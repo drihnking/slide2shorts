@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slide2Shorts Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; max-width: 800px; margin: auto; }
+    input, button, textarea { width: 100%; padding: 0.75rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+    button { background: #2563eb; color: white; font-weight: bold; cursor: pointer; border: none; }
+    button:hover { background: #1d4ed8; }
+    .card { background: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #334155; }
+    pre { background: #0f172a; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #a7f3d0; }
+  </style>
+</head>
+<body>
+  <h1>Slide2Shorts Studio</h1>
+  
+  <div class="card">
+    <h3>1. Style Profile Extractor</h3>
+    <input type="text" id="reelUrl" placeholder="Paste Instagram Reel or TikTok Link" />
+    <button onclick="extractStyle()">Extract Style Rules</button>
+    <pre id="styleOutput">No style loaded.</pre>
+  </div>
+
+  <div class="card">
+    <h3>2. Audio & Captions Generation</h3>
+    <textarea id="scriptInput" rows="3" placeholder="Enter video narration text here...">Testing local speech generation and Whisper timestamps.</textarea>
+    <button onclick="generateVoice()">Generate Voice & Captions</button>
+  </div>
+
+  <div class="card">
+    <h3>3. Render & Preview Video</h3>
+    <button onclick="renderVideo()" style="background:#10b981;">Render Output MP4</button>
+    <video id="videoPlayer" controls width="100%" style="display:none; margin-top: 1rem; border-radius: 8px;"></video>
+  </div>
+
+  <script>
+    async function extractStyle() {
+      const url = document.getElementById('reelUrl').value;
+      document.getElementById('styleOutput').innerText = 'Extracting and analyzing style profile...';
+      const res = await fetch('/api/extract-style', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: url })
+      });
+      const data = await res.json();
+      document.getElementById('styleOutput').innerText = JSON.stringify(data, null, 2);
+    }
+
+    async function generateVoice() {
+      const text = document.getElementById('scriptInput').value;
+      alert('Generating TTS audio & Whisper captions...');
+      await fetch('/api/generate-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      alert('Audio and captions ready!');
+    }
+
+    async function renderVideo() {
+      alert('Rendering video locally via Remotion...');
+      const res = await fetch('/api/render-video');
+      const data = await res.json();
+      if (data.success) {
+        const player = document.getElementById('videoPlayer');
+        player.src = data.videoUrl;
+        player.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
