@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
 const { PDFParse } = require('pdf-parse');
 
 const app = express();
@@ -82,6 +85,61 @@ ${extractedText}`;
       await parser.destroy().catch(() => {});
     }
   }
+});
+
+app.post('/api/generate-voice', (req, res) => {
+  const narrationText = req.body && req.body.narrationText;
+  if (!narrationText || !String(narrationText).trim()) {
+    return res.status(400).json({ error: 'narrationText is required' });
+  }
+
+  const python = path.join(__dirname, 'venv', 'Scripts', 'python.exe');
+  const script = path.join(__dirname, 'generate_audio_local.py');
+  const captionsPath = path.join(__dirname, 'public', 'captions.json');
+
+  const child = spawn(
+    python,
+    [script, String(narrationText)],
+    { cwd: __dirname, windowsHide: true }
+  );
+
+  let stdout = '';
+  let stderr = '';
+  let responded = false;
+
+  const fail = (status, error) => {
+    if (responded) return;
+    responded = true;
+    res.status(status).json({ error, stderr: stderr.slice(-4000) });
+  };
+
+  child.stdout.on('data', (chunk) => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk.toString();
+  });
+  child.on('error', (err) => {
+    fail(500, `Failed to start Python: ${err.message}`);
+  });
+  child.on('close', (code) => {
+    if (responded) return;
+    if (code !== 0) {
+      return fail(500, `Voice pipeline exited with code ${code}`);
+    }
+    try {
+      const captions = JSON.parse(fs.readFileSync(captionsPath, 'utf8'));
+      responded = true;
+      return res.json({
+        audioPath: 'public/audio.wav',
+        captionsPath: 'public/captions.json',
+        captions,
+        stdout: stdout.trim() || undefined,
+      });
+    } catch (err) {
+      return fail(500, `Pipeline finished but captions were missing: ${err.message}`);
+    }
+  });
 });
 
 app.listen(PORT, () => {
