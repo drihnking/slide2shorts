@@ -1,0 +1,5 @@
+node_modules/
+.env
+public/audio.*
+public/output.mp4
+__pycache__/
