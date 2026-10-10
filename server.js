@@ -142,6 +142,19 @@ app.post('/api/generate-voice', (req, res) => {
   });
 });
 
+const { exec } = require('child_process');
+
+app.get('/api/render-video', (req, res) => {
+  const cmd = `npx remotion render src/index.ts MainComposition public/output.mp4`;
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Render error: ${error.message}`);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true, videoUrl: '/output.mp4' });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
