@@ -155,6 +155,39 @@ app.get('/api/render-video', (req, res) => {
   });
 });
 
+const execYtdlp = require('yt-dlp-exec');
+const { exec } = require('child_process');
+const axios = require('axios');
+
+app.post('/api/extract-style', async (req, res) => {
+  const { videoUrl, rawText } = req.body;
+  let transcriptText = rawText || '';
+
+  try {
+    if (videoUrl) {
+      await execYtdlp(videoUrl, {
+        extractAudio: true,
+        audioFormat: 'wav',
+        output: 'temp/sample_audio.wav',
+      });
+
+      const { stdout } = await exec(`.\\venv\\Scripts\\python.exe transcribe.py temp/sample_audio.wav`);
+      transcriptText = JSON.parse(stdout).text;
+    }
+
+    const ollamaResponse = await axios.post('http://localhost:11434/api/generate', {
+      model: 'llama3.2',
+      prompt: `Analyze this transcript and return ONLY JSON with fields fontFamily, primaryColor, hookType, pacing: "${transcriptText}"`,
+      stream: false,
+      format: 'json'
+    });
+
+    res.json(JSON.parse(ollamaResponse.data.response));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -29,7 +29,8 @@
     "pdf-parse": "^2.4.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "remotion": "^4.0.534"
+    "remotion": "^4.0.534",
+    "yt-dlp-exec": "^1.0.2"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
