@@ -1,73 +1,469 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Slide2Shorts Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Slide2Shorts Studio</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; max-width: 800px; margin: auto; }
-    input, button, textarea { width: 100%; padding: 0.75rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-    button { background: #2563eb; color: white; font-weight: bold; cursor: pointer; border: none; }
-    button:hover { background: #1d4ed8; }
-    .card { background: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #334155; }
-    pre { background: #0f172a; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #a7f3d0; }
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --accent-color: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border-color: #334155;
+      --disabled-color: #475569;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    input[type="text"], input[type="number"], select, textarea, input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 46px;
+      padding: 4px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    label input, label select {
+      margin-top: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 16px;
+      margin-top: 16px;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin: 12px 0 0 0;
+      line-height: 1.4;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      color: #4ade80;
+      min-height: 1.2em;
+      margin-bottom: 4px;
+    }
+
+    button {
+      width: 100%;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+
+    button:disabled {
+      background-color: var(--disabled-color);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    pre {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      overflow-x: auto;
+      margin-top: 16px;
+      margin-bottom: 0;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      max-height: 250px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
-  <h1>Slide2Shorts Studio</h1>
-  
-  <div class="card">
-    <h3>1. Style Profile Extractor</h3>
-    <input type="text" id="reelUrl" placeholder="Paste Instagram Reel or TikTok Link" />
-    <button onclick="extractStyle()">Extract Style Rules</button>
-    <pre id="styleOutput">No style loaded.</pre>
-  </div>
 
-  <div class="card">
-    <h3>2. Audio & Captions Generation</h3>
-    <textarea id="scriptInput" rows="3" placeholder="Enter video narration text here...">Testing local speech generation and Whisper timestamps.</textarea>
-    <button onclick="generateVoice()">Generate Voice & Captions</button>
-  </div>
+  <div class="container">
+    <h1>Slide2Shorts Studio 🎬</h1>
 
-  <div class="card">
-    <h3>3. Render & Preview Video</h3>
-    <button onclick="renderVideo()" style="background:#10b981;">Render Output MP4</button>
-    <video id="videoPlayer" controls width="100%" style="display:none; margin-top: 1rem; border-radius: 8px;"></video>
+    <!-- 1. Style Profile -->
+    <div class="card">
+      <h2>1. Style Profile</h2>
+      <input
+        type="text"
+        id="styleUrl"
+        placeholder="Paste YouTube Short or reference video URL (optional)..."
+      />
+      <button id="btnExtractStyle" onclick="extractStyle()">Extract Style Rules</button>
+      <p class="hint">
+        Note: extraction only sends the URL text to the AI. It can't actually watch the video,
+        so treat the result as a starting point and edit the values below.
+        Changes save automatically and are used when the video renders.
+      </p>
+
+      <div class="grid">
+        <label>Caption color
+          <input type="color" id="styleColor" value="#ffffff" />
+        </label>
+        <label>Font family
+          <input type="text" id="styleFont" value="Inter" />
+        </label>
+        <label>Font size (px)
+          <input type="number" id="styleSize" min="16" max="200" value="64" />
+        </label>
+        <label>Caption position
+          <select id="stylePosition">
+            <option value="top">Top</option>
+            <option value="center">Center</option>
+            <option value="bottom">Bottom</option>
+          </select>
+        </label>
+      </div>
+      <div class="status" id="styleStatus"></div>
+      <pre id="styleOutput">// Saved style will appear here...</pre>
+    </div>
+
+    <!-- 2. PDF Script Generator -->
+    <div class="card">
+      <h2>2. PDF Script Parser</h2>
+      <input type="file" id="pdfFile" accept="application/pdf" />
+      <button id="btnParsePdf" onclick="parsePdf()">Generate Script from PDF</button>
+
+      <div id="sectionPicker" style="display:none; margin-top:16px;">
+        <label>Send this section to Step 3
+          <select id="sectionSelect" onchange="useSection()"></select>
+        </label>
+      </div>
+
+      <pre id="pdfOutput">// Script output will appear here...</pre>
+      <p class="hint">The script is saved automatically, so it will still be here if you reload the page.</p>
+    </div>
+
+    <!-- 3. Voice & Subtitles -->
+    <div class="card">
+      <h2>3. Voice & Subtitle Generator</h2>
+      <textarea id="scriptText" rows="6" placeholder="Enter script text for TTS voiceover (or pick a section in Step 2)..."></textarea>
+      <button id="btnGenerateVoice" onclick="generateVoice()">Generate Audio & Captions</button>
+      <pre id="voiceOutput">// Captions JSON will appear here...</pre>
+    </div>
+
+    <!-- 4. Video Renderer -->
+    <div class="card">
+      <h2>4. Video Renderer</h2>
+      <button id="btnRenderVideo" onclick="renderVideo()">Render Final Video</button>
+      <pre id="renderOutput">// Render status will appear here...</pre>
+    </div>
   </div>
 
   <script>
-    async function extractStyle() {
-      const url = document.getElementById('reelUrl').value;
-      document.getElementById('styleOutput').innerText = 'Extracting and analyzing style profile...';
-      const res = await fetch('/api/extract-style', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoUrl: url })
-      });
-      const data = await res.json();
-      document.getElementById('styleOutput').innerText = JSON.stringify(data, null, 2);
-    }
-
-    async function generateVoice() {
-      const text = document.getElementById('scriptInput').value;
-      alert('Generating TTS audio & Whisper captions...');
-      await fetch('/api/generate-voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      alert('Audio and captions ready!');
-    }
-
-    async function renderVideo() {
-      alert('Rendering video locally via Remotion...');
-      const res = await fetch('/api/render-video');
-      const data = await res.json();
-      if (data.success) {
-        const player = document.getElementById('videoPlayer');
-        player.src = data.videoUrl;
-        player.style.display = 'block';
+    // Helper to safely format UI outputs
+    function displayOutput(elementId, data) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (typeof data === 'string') {
+        el.textContent = data;
+      } else {
+        el.textContent = JSON.stringify(data, null, 2);
       }
     }
+
+    // ---------------------------------------------------------
+    // Style form: fill, read, and auto-save
+    // ---------------------------------------------------------
+    let styleSaveTimer = null;
+
+    function fillStyleForm(s) {
+      document.getElementById('styleColor').value = s.primaryColor || '#ffffff';
+      document.getElementById('styleFont').value = s.fontFamily || 'Inter';
+      document.getElementById('styleSize').value = s.fontSize || 64;
+      document.getElementById('stylePosition').value = s.captionPosition || 'bottom';
+      displayOutput('styleOutput', s);
+    }
+
+    function readStyleForm() {
+      return {
+        primaryColor: document.getElementById('styleColor').value,
+        fontFamily: document.getElementById('styleFont').value,
+        fontSize: Number(document.getElementById('styleSize').value),
+        captionPosition: document.getElementById('stylePosition').value
+      };
+    }
+
+    async function saveStyle() {
+      const status = document.getElementById('styleStatus');
+      try {
+        const response = await fetch('/api/save-style', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(readStyleForm())
+        });
+        const data = await response.json();
+        if (data.style) {
+          displayOutput('styleOutput', data.style);
+          status.textContent = 'Saved ✓';
+        }
+      } catch (err) {
+        console.error('Save style error:', err);
+        status.style.color = '#f87171';
+        status.textContent = 'Could not save style.';
+      }
+    }
+
+    function scheduleSaveStyle() {
+      const status = document.getElementById('styleStatus');
+      status.style.color = '#4ade80';
+      status.textContent = 'Saving...';
+      clearTimeout(styleSaveTimer);
+      styleSaveTimer = setTimeout(saveStyle, 500);
+    }
+
+    ['styleColor', 'styleFont', 'styleSize', 'stylePosition'].forEach((id) => {
+      document.getElementById(id).addEventListener('input', scheduleSaveStyle);
+    });
+
+    // 1. Style Extractor Function
+    async function extractStyle() {
+      const inputEl = document.getElementById('styleUrl');
+      const btn = document.getElementById('btnExtractStyle');
+      const status = document.getElementById('styleStatus');
+      if (!inputEl) return;
+
+      const cleanUrl = inputEl.value.trim().replace(/^"|"$/g, '');
+      if (!cleanUrl) {
+        displayOutput('styleOutput', { error: 'Please enter a valid URL.' });
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Extracting Style Rules...';
+      displayOutput('styleOutput', 'Extracting style rules...');
+
+      try {
+        const response = await fetch('/api/extract-style', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: cleanUrl })
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          displayOutput('styleOutput', data);
+        } else {
+          fillStyleForm(data);
+          status.style.color = '#4ade80';
+          status.textContent = 'Extracted and saved ✓';
+        }
+      } catch (err) {
+        console.error('Style Extraction Fetch Error:', err);
+        displayOutput('styleOutput', { error: 'Failed to connect to backend server.' });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Extract Style Rules';
+      }
+    }
+
+    // ---------------------------------------------------------
+    // Script: render, section picker, restore on load
+    // ---------------------------------------------------------
+    let savedSegments = [];
+
+    function renderScript(data) {
+      savedSegments = data.segments || [];
+      displayOutput('pdfOutput', data.script || '// Script output will appear here...');
+
+      const select = document.getElementById('sectionSelect');
+      select.innerHTML = '';
+      savedSegments.forEach((_, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = 'Section ' + (i + 1);
+        select.appendChild(opt);
+      });
+
+      document.getElementById('sectionPicker').style.display = savedSegments.length ? 'block' : 'none';
+      if (savedSegments.length) {
+        select.value = 0;
+        useSection();
+      }
+    }
+
+    // Copy the chosen section into the Step 3 text box
+    function useSection() {
+      const i = Number(document.getElementById('sectionSelect').value);
+      document.getElementById('scriptText').value = savedSegments[i] || '';
+    }
+
+    // 2. PDF Parser Function
+    async function parsePdf() {
+      const fileInput = document.getElementById('pdfFile');
+      const btn = document.getElementById('btnParsePdf');
+
+      if (!fileInput.files || !fileInput.files.length) {
+        displayOutput('pdfOutput', { error: 'Please select a PDF file first.' });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('pdf', fileInput.files[0]);
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Parsing PDF...';
+      displayOutput('pdfOutput', 'Reading PDF slides and generating study guide... this can take a few minutes for long PDFs.');
+
+      try {
+        const response = await fetch('/api/parse-pdf', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          displayOutput('pdfOutput', data);
+        } else {
+          renderScript(data);
+        }
+      } catch (err) {
+        console.error('PDF Parse Error:', err);
+        displayOutput('pdfOutput', { error: 'Failed to process PDF file.' });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Script from PDF';
+      }
+    }
+
+    // 3. Voice Generator Function
+    async function generateVoice() {
+      const textEl = document.getElementById('scriptText');
+      const btn = document.getElementById('btnGenerateVoice');
+      const text = textEl ? textEl.value.trim() : '';
+
+      if (!text) {
+        displayOutput('voiceOutput', { error: 'Please enter script text.' });
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating Voice & Captions...';
+      displayOutput('voiceOutput', 'Generating Kokoro audio and Whisper transcription...');
+
+      try {
+        const response = await fetch('/api/generate-voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await response.json();
+        displayOutput('voiceOutput', data);
+      } catch (err) {
+        console.error('Voice Generation Error:', err);
+        displayOutput('voiceOutput', { error: 'Failed to generate TTS audio/captions.' });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Audio & Captions';
+      }
+    }
+
+    // 4. Video Render Function
+    async function renderVideo() {
+      const btn = document.getElementById('btnRenderVideo');
+      btn.disabled = true;
+      btn.textContent = '⏳ Rendering Video...';
+      displayOutput('renderOutput', 'Triggering Remotion video pipeline...');
+
+      try {
+        const response = await fetch('/api/render-video');
+        const data = await response.json();
+        displayOutput('renderOutput', data);
+      } catch (err) {
+        console.error('Render Error:', err);
+        displayOutput('renderOutput', { error: 'Failed to start video rendering.' });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Render Final Video';
+      }
+    }
+
+    // ---------------------------------------------------------
+    // On page load: restore the saved style and script
+    // ---------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const style = await (await fetch('/api/style')).json();
+        fillStyleForm(style);
+      } catch (err) {
+        console.error('Could not load saved style:', err);
+      }
+      try {
+        const saved = await (await fetch('/api/script')).json();
+        if (saved.segments && saved.segments.length) renderScript(saved);
+      } catch (err) {
+        console.error('Could not load saved script:', err);
+      }
+    });
   </script>
 </body>
 </html>
